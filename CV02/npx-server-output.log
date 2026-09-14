@@ -1,0 +1,40 @@
+Starting up http-server, serving C:\Users\11425\Downloads\CV02
+
+http-server version: 14.1.1
+
+http-server settings: 
+CORS: disabled
+Cache: 3600 seconds
+Connection Timeout: 120 seconds
+Directory Listings: visible
+AutoIndex: visible
+Serve GZIP Files: false
+Serve Brotli Files: false
+Default File Extension: none
+
+Available on:
+  http://192.168.128.63:8000
+  http://127.0.0.1:8000
+Hit CTRL-C to stop the server
+
+[2026-09-14T11:24:04.920Z]  "GET /" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.137.0 Chrome/148.0.7778.280 Electron/42.10.0 Safari/537.36"
+[2026-09-14T11:24:04.936Z]  "GET /assets/css/styles.css" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.137.0 Chrome/148.0.7778.280 Electron/42.10.0 Safari/537.36"
+[2026-09-14T11:24:04.940Z]  "GET /assets/js/data.js" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.137.0 Chrome/148.0.7778.280 Electron/42.10.0 Safari/537.36"
+[2026-09-14T11:24:04.942Z]  "GET /assets/js/main.js" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.137.0 Chrome/148.0.7778.280 Electron/42.10.0 Safari/537.36"
+[2026-09-14T11:24:04.956Z]  "GET /%E7%8E%8B%E5%B4%A7%E4%BD%9C%E5%93%81%E9%9B%86_%E7%8B%AC%E7%AB%8B%E7%89%88.html" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.137.0 Chrome/148.0.7778.280 Electron/42.10.0 Safari/537.36"
+[2026-09-14T11:24:05.172Z]  "GET /favicon.ico" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.137.0 Chrome/148.0.7778.280 Electron/42.10.0 Safari/537.36"
+[2026-09-14T11:24:05.174Z]  "GET /favicon.ico" Error (404): "Not found"
+[2026-09-14T11:24:16.352Z]  "GET /" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.137.0 Chrome/148.0.7778.280 Electron/42.10.0 Safari/537.36"
+[2026-09-14T11:24:16.360Z]  "GET /assets/css/styles.css" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.137.0 Chrome/148.0.7778.280 Electron/42.10.0 Safari/537.36"
+[2026-09-14T11:24:16.361Z]  "GET /assets/js/data.js" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.137.0 Chrome/148.0.7778.280 Electron/42.10.0 Safari/537.36"
+[2026-09-14T11:24:16.363Z]  "GET /assets/js/main.js" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.137.0 Chrome/148.0.7778.280 Electron/42.10.0 Safari/537.36"
+[2026-09-14T11:24:16.373Z]  "GET /%E7%8E%8B%E5%B4%A7%E4%BD%9C%E5%93%81%E9%9B%86_%E7%8B%AC%E7%AB%8B%E7%89%88.html" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.137.0 Chrome/148.0.7778.280 Electron/42.10.0 Safari/537.36"
+[2026-09-14T11:24:16.472Z]  "GET /favicon.ico" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.137.0 Chrome/148.0.7778.280 Electron/42.10.0 Safari/537.36"
+[2026-09-14T11:24:16.473Z]  "GET /favicon.ico" Error (404): "Not found"
+[2026-09-14T11:24:26.140Z]  "GET /" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36 Edg/153.0.0.0"
+[2026-09-14T11:24:26.194Z]  "GET /%E7%8E%8B%E5%B4%A7%E4%BD%9C%E5%93%81%E9%9B%86_%E7%8B%AC%E7%AB%8B%E7%89%88.html" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36 Edg/153.0.0.0"
+[2026-09-14T11:24:26.211Z]  "GET /assets/css/styles.css" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36 Edg/153.0.0.0"
+[2026-09-14T11:24:26.214Z]  "GET /assets/js/data.js" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36 Edg/153.0.0.0"
+[2026-09-14T11:24:26.214Z]  "GET /assets/js/main.js" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36 Edg/153.0.0.0"
+[2026-09-14T11:24:27.046Z]  "GET /favicon.ico" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36 Edg/153.0.0.0"
+[2026-09-14T11:24:27.048Z]  "GET /favicon.ico" Error (404): "Not found"
