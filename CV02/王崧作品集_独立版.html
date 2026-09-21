@@ -10,6 +10,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=Playfair+Display:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.146.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.146.0/examples/js/loaders/GLTFLoader.js"></script>
     <style>
         :root {
             --bg-dark: #f5f5ed;
@@ -313,12 +315,35 @@
             box-shadow: 0 25px 60px rgba(0,0,0,0.5);
             transform: perspective(800px) rotateY(-4deg);
             transition: transform 0.6s var(--transition);
+            background: radial-gradient(circle at top, rgba(255,255,255,0.14), rgba(200,164,92,0.08) 30%, rgba(0,0,0,0.04) 70%);
+            border: 1px solid rgba(200,164,92,0.12);
+            isolation: isolate;
         }
         .hero-image:hover { transform: perspective(800px) rotateY(0deg) scale(1.02); }
         .hero-image img { width: 100%; height: 100%; object-fit: cover; }
+        .hero-image::before {
+            content: ''; position: absolute; inset: 8% 12% 10%;
+            border-radius: 50%; z-index: 0;
+            background: radial-gradient(circle, rgba(255,255,255,0.18), rgba(200,164,92,0.05) 34%, transparent 72%);
+            filter: blur(42px);
+            pointer-events: none;
+        }
         .hero-image::after {
-            content: ''; position: absolute; inset: 0;
-            background: linear-gradient(to top, rgba(10,10,15,0.5) 0%, transparent 50%);
+            content: ''; position: absolute; inset: 0; z-index: 1;
+            background: linear-gradient(to top, rgba(10,10,15,0.45) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        .hero-3d-model {
+            position: absolute; inset: 0; z-index: 2;
+            width: 100%; height: 100%; pointer-events: auto; overflow: hidden;
+            max-width: 100%; max-height: 100%;
+            cursor: grab; touch-action: none;
+        }
+        .hero-3d-model.is-dragging { cursor: grabbing; }
+        .hero-3d-model canvas {
+            width: 100% !important; height: 100% !important; display: block;
+            background: transparent; position: relative; z-index: 2;
+            max-width: 100%; max-height: 100%; object-fit: contain;
         }
 
         .float-card {
@@ -1320,6 +1345,178 @@
             { text: '包容性', size: 13, color: '#f15534' }
         ];
 
+        function initHeroModel() {
+            const heroImage = document.querySelector('.hero-image');
+            if (heroImage && !heroImage.querySelector('#hero-3d-model')) {
+                const existingImg = heroImage.querySelector('img');
+                const modelHost = document.createElement('div');
+                modelHost.className = 'hero-3d-model';
+                modelHost.id = 'hero-3d-model';
+                modelHost.setAttribute('aria-label', '3D 模型展示');
+                if (existingImg) {
+                    heroImage.insertBefore(modelHost, existingImg);
+                    existingImg.remove();
+                } else {
+                    heroImage.appendChild(modelHost);
+                }
+            }
+
+            const container = document.getElementById('hero-3d-model');
+            const THREE = window.THREE;
+            const GLTFLoader = window.THREE && (window.THREE.GLTFLoader || window.GLTFLoader);
+            if (!container || !THREE || !GLTFLoader || container.dataset.ready === 'true') return;
+            container.dataset.ready = 'true';
+
+            const ThreeGlobal = window.THREE;
+            const scene = new ThreeGlobal.Scene();
+            scene.background = null;
+
+            const camera = new ThreeGlobal.PerspectiveCamera(28, 1, 0.1, 1000);
+            camera.position.set(0, 0.12, 2.7);
+
+            const renderer = new ThreeGlobal.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+            renderer.setClearColor(0x000000, 0);
+            renderer.outputColorSpace = ThreeGlobal.SRGBColorSpace;
+            renderer.toneMapping = ThreeGlobal.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.15;
+            renderer.domElement.style.width = '100%';
+            renderer.domElement.style.height = '100%';
+            renderer.domElement.style.display = 'block';
+            renderer.domElement.style.transform = 'none';
+            container.appendChild(renderer.domElement);
+
+            const ambient = new ThreeGlobal.AmbientLight(0xffffff, 1.6);
+            scene.add(ambient);
+            const key = new ThreeGlobal.DirectionalLight(0xffffff, 2.2);
+            key.position.set(2.5, 3.5, 4.0);
+            scene.add(key);
+            const rim = new ThreeGlobal.DirectionalLight(0xcfe0ff, 1.4);
+            rim.position.set(-3.2, 1.2, -2.2);
+            scene.add(rim);
+
+            const modelRoot = new ThreeGlobal.Group();
+            scene.add(modelRoot);
+
+            const loader = new GLTFLoader();
+            loader.load('./00G.glb', (gltf) => {
+                const model = gltf.scene;
+                model.traverse((child) => {
+                    if (child.isMesh) {
+                        child.castShadow = false;
+                        child.receiveShadow = false;
+                    }
+                });
+
+                const box = new ThreeGlobal.Box3().setFromObject(model);
+                const sphere = box.getBoundingSphere(new ThreeGlobal.Sphere());
+                const radius = sphere.radius || 1;
+                const fitScale = 0.9 / radius;
+                model.scale.setScalar(fitScale);
+
+                const center = sphere.center.clone();
+                model.position.copy(center).multiplyScalar(-1);
+                model.position.y += -0.06;
+                model.rotation.set(0.12, 0.85, 0.02);
+                modelRoot.add(model);
+                modelRoot.userData.ready = true;
+                modelRoot.userData.baseScale = fitScale;
+            }, undefined, (error) => {
+                console.error('GLB 模型加载失败:', error);
+            });
+
+            const state = { x: 0, y: 0, zoom: 0, hover: false, dragging: false, dragX: 0, dragY: 0 };
+            const updateFromPointer = (event) => {
+                const rect = container.getBoundingClientRect();
+                const inside = event.clientX >= rect.left && event.clientX <= rect.right && event.clientY >= rect.top && event.clientY <= rect.bottom;
+                state.hover = inside;
+                if (state.dragging) {
+                    state.x = state.dragX + (event.clientX - state.dragStartX) / rect.width * 1.8;
+                    state.y = state.dragY + (event.clientY - state.dragStartY) / rect.height * 1.8;
+                    return;
+                }
+                if (!inside) return;
+                const px = (event.clientX - rect.left) / rect.width - 0.5;
+                const py = (event.clientY - rect.top) / rect.height - 0.5;
+                state.x = px * 2;
+                state.y = py * 2;
+            };
+
+            document.addEventListener('pointermove', updateFromPointer, { passive: true });
+            container.addEventListener('pointerenter', () => { state.hover = true; }, { passive: true });
+            container.addEventListener('pointerleave', () => { if (!state.dragging) state.hover = false; }, { passive: true });
+            container.addEventListener('pointerdown', (event) => {
+                if (event.button !== 0) return;
+                event.preventDefault();
+                state.dragging = true;
+                state.hover = true;
+                state.dragStartX = event.clientX;
+                state.dragStartY = event.clientY;
+                state.dragX = state.x;
+                state.dragY = state.y;
+                container.classList.add('is-dragging');
+                container.setPointerCapture(event.pointerId);
+            });
+            const stopDragging = (event) => {
+                if (!state.dragging) return;
+                state.dragging = false;
+                state.x = ThreeGlobal.MathUtils.clamp(state.x, -1.8, 1.8);
+                state.y = ThreeGlobal.MathUtils.clamp(state.y, -1.8, 1.8);
+                container.classList.remove('is-dragging');
+                if (event && container.hasPointerCapture(event.pointerId)) container.releasePointerCapture(event.pointerId);
+            };
+            container.addEventListener('pointerup', stopDragging, { passive: true });
+            container.addEventListener('pointercancel', stopDragging, { passive: true });
+            container.addEventListener('wheel', (event) => {
+                if (!state.hover) return;
+                event.stopPropagation();
+                event.preventDefault();
+                state.zoom = ThreeGlobal.MathUtils.clamp(state.zoom - event.deltaY * 0.00055, -0.42, 0.34);
+            }, { passive: false });
+            window.addEventListener('resize', () => {
+                const width = container.clientWidth || 420;
+                const height = container.clientHeight || 520;
+                renderer.setSize(width, height, false);
+                camera.aspect = width / height;
+                camera.updateProjectionMatrix();
+            });
+
+            const resize = () => {
+                const width = container.clientWidth || 420;
+                const height = container.clientHeight || 520;
+                renderer.setSize(width, height, false);
+                camera.aspect = width / height;
+                camera.updateProjectionMatrix();
+            };
+            resize();
+
+            const animate = () => {
+                const t = performance.now() * 0.001;
+                const targetX = 0.16 + state.y * 0.22;
+                const targetY = 0.62 + state.x * 0.7;
+                const drift = Math.sin(t * 1.1) * 0.08;
+
+                if (modelRoot.userData.ready) {
+                    modelRoot.rotation.x = ThreeGlobal.MathUtils.lerp(modelRoot.rotation.x, targetX, 0.08);
+                    modelRoot.rotation.y = ThreeGlobal.MathUtils.lerp(modelRoot.rotation.y, targetY, 0.08);
+                    modelRoot.rotation.z = ThreeGlobal.MathUtils.lerp(modelRoot.rotation.z, state.x * 0.08, 0.08);
+                    modelRoot.position.x = state.x * 0.05;
+                    modelRoot.position.y = drift;
+                    const baseScale = modelRoot.userData.baseScale || 1;
+                    const boundedZoom = ThreeGlobal.MathUtils.clamp(1 + state.zoom, 0.58, 1.26);
+                    modelRoot.scale.setScalar(baseScale * boundedZoom);
+                }
+
+                camera.position.x = ThreeGlobal.MathUtils.lerp(camera.position.x, state.x * 0.1, 0.06);
+                camera.position.y = ThreeGlobal.MathUtils.lerp(camera.position.y, 0.01 - state.y * 0.04, 0.06);
+                camera.position.z = ThreeGlobal.MathUtils.lerp(camera.position.z, 3.2, 0.08);
+                camera.lookAt(0, 0.01, 0);
+                renderer.render(scene, camera);
+                requestAnimationFrame(animate);
+            };
+            requestAnimationFrame(animate);
+        }
+
         function init() {
             renderNavDots();
             renderMobileNav();
@@ -1327,6 +1524,7 @@
             renderWorksGrid();
             renderWordCloud();
             initCategoryChart();
+            initHeroModel();
             initSceneLinkage();
             initColorMotion();
             updateSlide(0, true);
@@ -1723,6 +1921,14 @@
 
             let wheelTimeout;
             canvas.addEventListener('wheel', (e) => {
+                const modelHost = document.getElementById('hero-3d-model');
+                const isOverModel = !!(modelHost && e.target && modelHost.contains(e.target));
+                if (isOverModel) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    return;
+                }
+
                 const slideContent = e.target.closest('.slide-content');
                 if (slideContent && slideContent.scrollHeight > slideContent.clientHeight) {
                     const atBottom = slideContent.scrollTop + slideContent.clientHeight >= slideContent.scrollHeight - 2;

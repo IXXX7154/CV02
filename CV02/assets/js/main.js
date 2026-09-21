@@ -19,7 +19,7 @@ const slides = [
           </div>
         </div>
         <div class="hero-image">
-          <img src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=900&q=80" alt="作品封面" />
+          <div class="hero-3d-model" id="hero-3d-model" aria-label="3D 模型展示"></div>
           <div class="float-card" style="bottom: 24px; left: -50px;">
             <h4>毕业设计</h4>
             <p>疗愈五感 · 童趣空间</p>
@@ -260,6 +260,127 @@ function renderSlides() {
   document.getElementById('mobileNav').innerHTML = slideTitles.map((title, i) => `
     <div class="mobile-nav-item ${i === 0 ? 'active' : ''}" data-index="${i}">${String(i + 1).padStart(2, '0')} · ${title}</div>
   `).join('');
+}
+
+function initHeroModel() {
+  const container = document.getElementById('hero-3d-model');
+  if (!container || !window.THREE || !window.GLTFLoader || container.dataset.ready === 'true') return;
+
+  container.dataset.ready = 'true';
+  const THREE = window.THREE;
+  const GLTFLoader = window.GLTFLoader;
+
+  const scene = new THREE.Scene();
+  scene.background = null;
+
+  const camera = new THREE.PerspectiveCamera(28, 1, 0.1, 1000);
+  camera.position.set(0, 0.25, 4.8);
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setClearColor(0x000000, 0);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.1;
+  container.appendChild(renderer.domElement);
+
+  const ambientLight = new THREE.AmbientLight(0xffffff, 1.7);
+  scene.add(ambientLight);
+
+  const keyLight = new THREE.DirectionalLight(0xffffff, 2.0);
+  keyLight.position.set(2.5, 3.5, 4.0);
+  scene.add(keyLight);
+
+  const rimLight = new THREE.DirectionalLight(0xc7d8ff, 1.8);
+  rimLight.position.set(-3, 1.5, -2);
+  scene.add(rimLight);
+
+  const modelRoot = new THREE.Group();
+  scene.add(modelRoot);
+
+  const loader = new GLTFLoader();
+  loader.load(
+    './00G.glb',
+    (gltf) => {
+      const model = gltf.scene;
+      model.traverse((child) => {
+        if (child.isMesh) {
+          child.castShadow = false;
+          child.receiveShadow = false;
+        }
+      });
+
+      const box = new THREE.Box3().setFromObject(model);
+      const size = box.getSize(new THREE.Vector3());
+      const maxDim = Math.max(size.x, size.y, size.z) || 1;
+      const scale = 2.2 / maxDim;
+      model.scale.setScalar(scale);
+      box.setFromObject(model);
+      const center = new THREE.Vector3();
+      box.getCenter(center);
+      model.position.sub(center);
+      model.position.y = -0.35;
+      model.rotation.set(0.45, 0.9, 0.18);
+      modelRoot.add(model);
+      modelRoot.userData.ready = true;
+    },
+    undefined,
+    (error) => {
+      console.error('GLB 模型加载失败:', error);
+    }
+  );
+
+  const state = {
+    pointerX: 0,
+    pointerY: 0,
+    scrollY: window.scrollY
+  };
+
+  const resizeModel = () => {
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+    renderer.setSize(width, height, false);
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+  };
+
+  const handlePointerMove = (event) => {
+    const rect = container.getBoundingClientRect();
+    const nx = (event.clientX - rect.left) / rect.width;
+    const ny = (event.clientY - rect.top) / rect.height;
+    state.pointerX = (nx - 0.5) * 2;
+    state.pointerY = (ny - 0.5) * 2;
+  };
+
+  const handleScroll = () => {
+    state.scrollY = window.scrollY;
+  };
+
+  window.addEventListener('pointermove', handlePointerMove);
+  window.addEventListener('scroll', handleScroll, { passive: true });
+  window.addEventListener('resize', resizeModel);
+
+  const animate = () => {
+    const time = performance.now() * 0.001;
+    const targetX = 0.2 + state.pointerY * 0.8;
+    const targetY = 0.9 + state.pointerX * 1.2 + state.scrollY * 0.0008;
+
+    if (modelRoot.userData.ready) {
+      modelRoot.rotation.x = THREE.MathUtils.lerp(modelRoot.rotation.x, targetX, 0.06);
+      modelRoot.rotation.y = THREE.MathUtils.lerp(modelRoot.rotation.y, targetY, 0.06);
+      modelRoot.rotation.z = THREE.MathUtils.lerp(modelRoot.rotation.z, state.pointerX * 0.35, 0.06);
+      modelRoot.position.y = Math.sin(time * 1.4 + state.scrollY * 0.01) * 0.12;
+    }
+
+    camera.position.x = THREE.MathUtils.lerp(camera.position.x, state.pointerX * 0.7, 0.05);
+    camera.position.y = THREE.MathUtils.lerp(camera.position.y, 0.25 - state.pointerY * 0.45, 0.05);
+    camera.lookAt(0, 0.1, 0);
+    renderer.render(scene, camera);
+    requestAnimationFrame(animate);
+  };
+
+  resizeModel();
+  animate();
 }
 
 function renderTimeline() {
@@ -513,6 +634,7 @@ function closeLightbox() {
 
 function init() {
   renderSlides();
+  initHeroModel();
   renderTimeline();
   renderWorksGrid();
   renderWordCloud();

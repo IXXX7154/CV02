@@ -180,8 +180,32 @@ p { margin: 0; color: var(--text-secondary); line-height: 1.7; font-size: clamp(
   overflow: hidden;
   box-shadow: 0 25px 60px rgba(0,0,0,0.5);
   transform: perspective(800px) rotateY(-4deg);
+  background: radial-gradient(circle at 20% 15%, rgba(232, 200, 129, 0.18), transparent 30%),
+    linear-gradient(135deg, rgba(255,255,255,0.03), rgba(0,0,0,0.08));
+  border: 1px solid rgba(200,164,92,0.12);
 }
-.hero-image img { width: 100%; height: 100%; object-fit: cover; }
+.hero-image::before {
+  content: "";
+  position: absolute;
+  inset: 8% 12% 10%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.12), rgba(200,164,92,0.04) 38%, transparent 70%);
+  filter: blur(45px);
+  pointer-events: none;
+}
+.hero-3d-model {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+.hero-3d-model canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+  background: transparent;
+}
 
 .float-card {
   position: absolute;
@@ -192,6 +216,7 @@ p { margin: 0; color: var(--text-secondary); line-height: 1.7; font-size: clamp(
   backdrop-filter: blur(10px);
   box-shadow: 0 15px 40px rgba(0,0,0,0.3);
   animation: float 6s ease-in-out infinite;
+  z-index: 2;
 }
 .float-card h4 { color: var(--accent); font-size: 0.85rem; margin-bottom: 6px; }
 .float-card p { font-size: 0.75rem; color: var(--text-secondary); margin: 0; }
