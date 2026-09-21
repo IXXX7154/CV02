@@ -1399,7 +1399,7 @@
             scene.add(modelRoot);
 
             const loader = new GLTFLoader();
-            loader.load('./00G.glb', (gltf) => {
+            loader.load('./00G.glb?v=20260921-2', (gltf) => {
                 const model = gltf.scene;
                 model.traverse((child) => {
                     if (child.isMesh) {
